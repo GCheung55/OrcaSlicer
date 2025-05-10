@@ -5540,6 +5540,30 @@ void PrintConfigDef::init_fff_params()
     def->mode = comAdvanced;
     def->set_default_value(new ConfigOptionBool(true));
 
+    // Custom Extrusion Order
+    def = this->add("enable_custom_extrusion_order", coBool);
+    def->label = L("Enable custom extrusion order");
+    def->category = L("Quality");
+    def->tooltip = L("Enable custom ordering of extrusion roles. If disabled, OrcaSlicer's default ordering logic (including Wall Infill Order, Wall Sequence, and Infill First settings) will be used. If enabled, the settings below take precedence, and the aforementioned OrcaSlicer settings will be ignored.");
+    def->mode = comAdvanced; // Or comSimple depending on desired visibility
+    def->set_default_value(new ConfigOptionBool(false));
+
+    def = this->add("custom_extrusion_role_order", coStrings);
+    def->label = L("Custom extrusion role order");
+    def->category = L("Quality");
+    def->tooltip = L("Define the specific order of extrusion roles. Roles will be processed in the sequence listed. This provides fine-grained control over the print sequence within a layer.");
+    def->mode = comAdvanced;
+    // def->gui_type line removed as it was causing a build error.
+    // The actual UI will be a custom listbox, default string handling is fine for backend.
+    def->set_default_value(new ConfigOptionStrings()); // Default to empty, logic will handle fallback.
+
+    def = this->add("custom_order_preserves_role_suborder", coBool);
+    def->label = L("Strictly preserve custom role order");
+    def->category = L("Quality");
+    def->tooltip = L("If checked, Slic3r's travel optimization will not reorder entities after the custom role order is applied. This gives full control over the sequence but may reduce travel path efficiency. If unchecked, Slic3r may optimize travel paths within the sequence defined by the custom role order.");
+    def->mode = comAdvanced;
+    def->set_default_value(new ConfigOptionBool(true));
+
     def = this->add("wall_generator", coEnum);
     def->label = L("Wall generator");
     def->category = L("Quality");

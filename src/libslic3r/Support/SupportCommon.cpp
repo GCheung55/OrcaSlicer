@@ -18,6 +18,8 @@
 #include "SupportCommon.hpp"
 #include "SupportLayer.hpp"
 #include "SupportParameters.hpp"
+#include "../ExtrusionOrderOptimizer.hpp" // Added for custom extrusion ordering
+#include "../PrintConfig.hpp"           // Added for accessing config options
 
 // #define SLIC3R_DEBUG
 
@@ -1920,6 +1922,21 @@ void generate_support_toolpaths(
     for (const SupportLayer *support_layer : support_layers)
         assert(Test::verify_nonempty(&support_layer->support_fills));
 #endif // NDEBUG
+
+    // Apply custom extrusion order if enabled
+    if (!support_layers.empty()) {
+        const PrintConfig& full_print_config = support_layers.front()->object()->print()->config();
+        if (full_print_config.enable_custom_extrusion_order) {
+            std::vector<ExtrusionRole> custom_roles = get_custom_extrusion_roles_from_config(full_print_config);
+            if (!custom_roles.empty()) {
+                for (SupportLayer *support_layer : support_layers) {
+                    if (support_layer != nullptr && !support_layer->support_fills.entities.empty()) {
+                        apply_custom_extrusion_order(support_layer->support_fills, custom_roles, full_print_config.custom_order_preserves_role_suborder);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /*

@@ -8,6 +8,8 @@
 #include "BoundingBox.hpp"
 #include "SVG.hpp"
 #include "Algorithm/RegionExpansion.hpp"
+#include "ExtrusionOrderOptimizer.hpp" // Added for custom extrusion ordering
+#include "PrintConfig.hpp"           // Added for accessing config options
 
 #include <string>
 #include <map>
@@ -121,6 +123,17 @@ void LayerRegion::make_perimeters(const SurfaceCollection &slices, const LayerRe
         g.process_arachne();
     else
         g.process_classic();
+
+    // Apply custom extrusion order if enabled
+    const PrintConfig& full_print_config = this->layer()->object()->print()->config();
+    if (full_print_config.enable_custom_extrusion_order) {
+        std::vector<ExtrusionRole> custom_roles = get_custom_extrusion_roles_from_config(full_print_config);
+        if (!custom_roles.empty()) {
+            apply_custom_extrusion_order(this->perimeters, custom_roles, full_print_config.custom_order_preserves_role_suborder);
+            // Thin fills are usually GapFill, apply the same ordering logic if they are part of the custom order.
+            apply_custom_extrusion_order(this->thin_fills, custom_roles, full_print_config.custom_order_preserves_role_suborder);
+        }
+    }
 }
 
 #if 1
@@ -1079,4 +1092,3 @@ void LayerRegion::simplify_loop(ExtrusionLoop* loop)
 }
 
 }
- 

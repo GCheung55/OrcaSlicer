@@ -16,6 +16,8 @@
 #include "FillConcentricInternal.hpp"
 #include "FillConcentric.hpp"
 #include "libslic3r.h"
+#include "ExtrusionOrderOptimizer.hpp" // Added for custom extrusion ordering
+// PrintConfig.hpp is already included via Print.hpp -> Layer.hpp -> PrintConfig.hpp or directly
 
 namespace Slic3r {
 
@@ -1011,6 +1013,19 @@ void Layer::make_fills(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive:
 	    for (size_t i = 0; i < layerm->fills.entities.size(); ++ i)
     	    assert(dynamic_cast<ExtrusionEntityCollection*>(layerm->fills.entities[i]) != nullptr);
 #endif
+
+    // Apply custom extrusion order if enabled
+    const PrintConfig& full_print_config = this->object()->print()->config();
+    if (full_print_config.enable_custom_extrusion_order) {
+        std::vector<ExtrusionRole> custom_roles = get_custom_extrusion_roles_from_config(full_print_config);
+        if (!custom_roles.empty()) {
+            for (LayerRegion *layerm : m_regions) {
+                if (layerm != nullptr && !layerm->fills.entities.empty()) {
+                    apply_custom_extrusion_order(layerm->fills, custom_roles, full_print_config.custom_order_preserves_role_suborder);
+                }
+            }
+        }
+    }
 }
 
 Polylines Layer::generate_sparse_infill_polylines_for_anchoring(FillAdaptive::Octree* adaptive_fill_octree, FillAdaptive::Octree* support_fill_octree,  FillLightning::Generator* lightning_generator) const

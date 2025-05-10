@@ -1369,6 +1369,10 @@ PRINT_CONFIG_CLASS_DERIVED_DEFINE(
     ((ConfigOptionPoint,               bed_mesh_probe_distance))
     ((ConfigOptionFloat,               adaptive_bed_mesh_margin))
 
+    // Custom Extrusion Order
+    ((ConfigOptionBool,                enable_custom_extrusion_order))
+    ((ConfigOptionStrings,             custom_extrusion_role_order))
+    ((ConfigOptionBool,                custom_order_preserves_role_suborder))
 
 )
 

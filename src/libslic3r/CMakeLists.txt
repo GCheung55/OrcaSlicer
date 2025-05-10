@@ -78,6 +78,8 @@ set(lisbslic3r_sources
     Extruder.hpp
     ExtrusionEntity.cpp
     ExtrusionEntity.hpp
+    ExtrusionOrderOptimizer.cpp
+    ExtrusionOrderOptimizer.hpp
     ExtrusionEntityCollection.cpp
     ExtrusionEntityCollection.hpp
     ExtrusionSimulator.cpp
